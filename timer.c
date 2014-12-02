@@ -92,8 +92,18 @@ long sdtimer_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 }
 
 ssize_t sdtimer_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
+	struct sdtimer_dev *dev;
 	
+	dev = filp->private_data;
 	
+	if (*f_pos < dev->vbuf_size) {
+		int i;
+		for (i = 0; (i < count) && (i + *f_pos < dev->vbuf_size); i++) {
+			buf[i] = dev->vbuf[i + *f_pos];
+		}
+		*f_pos += i;
+		return i;
+	}
 	return 0;
 }
 
